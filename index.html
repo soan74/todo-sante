@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>To Do santé — Rappels</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="To Do santé">
+<meta name="theme-color" content="#6D5AE6">
+<style>
+  :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(160deg,#EEF2FF,#FBEFFF);color:#1E1B3A;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:24px;text-align:center}
+  main{max-width:420px}
+  h1{font-size:1.8rem;margin:0 0 8px}
+  p{color:#6C6A88;line-height:1.5}
+  button{font:inherit;font-weight:600;font-size:1.05rem;padding:14px 22px;border:0;border-radius:12px;
+    background:#6D5AE6;color:#fff;cursor:pointer;margin-top:18px}
+  button:disabled{opacity:.6}
+  a.open{display:inline-block;margin-top:14px;color:#6D5AE6;font-weight:600;text-decoration:none}
+  #status{margin-top:16px;font-size:.92rem;color:#6C6A88;min-height:1.4em}
+</style>
+</head>
+<body>
+<main>
+  <h1>To Do santé</h1>
+  <p>Cette page sert uniquement à recevoir vos notifications de rappel. Vos tâches se cochent dans l'application habituelle.</p>
+  <button id="enable">Activer les notifications</button>
+  <p id="status"></p>
+  <a class="open" href="https://claude.ai/artifact/XydkFgNcG9QNUNJQ57Nbk7">Ouvrir l'application To Do →</a>
+</main>
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  const APP_URL = "https://claude.ai/artifact/XydkFgNcG9QNUNJQ57Nbk7";
+  const statusEl = document.getElementById("status");
+  const btn = document.getElementById("enable");
+
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function (OneSignal) {
+    try {
+      await OneSignal.init({ appId: "2130ec88-6baa-4ad9-8669-4471e77d0a31" });
+      const refresh = async () => {
+        const perm = OneSignal.Notifications.permission;
+        if (perm) { statusEl.textContent = "Notifications activées sur cet appareil."; btn.disabled = true; btn.textContent = "Activées"; }
+      };
+      refresh();
+      btn.onclick = async () => {
+        btn.disabled = true; btn.textContent = "Patientez...";
+        try { await OneSignal.Notifications.requestPermission(); } catch (e) {}
+        await refresh();
+        if (btn.textContent !== "Activées") { btn.disabled = false; btn.textContent = "Activer les notifications"; }
+      };
+    } catch (e) {
+      statusEl.textContent = "Impossible de charger les notifications pour l'instant.";
+    }
+  });
+
+  // Si la page est ouverte suite à un clic sur une notification, direction l'application.
+  if (location.hash === "#open") window.location.replace(APP_URL);
+</script>
+</body>
+</html>
